@@ -1,7 +1,6 @@
 import numpy as np
 import json
 import matplotlib.pyplot as plt
-from numba.cuda import shared
 
 import ang_coeff_calc as ang
 from ptbinnedfittinghelpers import *
@@ -11,26 +10,34 @@ def main():
     # plotting templates
     ptbinned = False
     cuts = True
-    bin = 0         #bins \in [0,nptbins-1] or 'of'
+    lab = True
+    bin = 0
+    #bins \in [0,nptbins-1] or 'of'
 
     if cuts:
         _cuts = ''
     else:
         _cuts = 'no'
+    if lab:
+        labp = 'labframe/'
+        laba = '_lab1'
+    else: labp = ''; laba = '1'
 
     if ptbinned:
-        pathtotemps =  '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/templates/ptbinned/Zjj_ptbin_temps_' + _cuts + 'cuts0'
-        pathtocoeffs = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_ptbinned/histo_nocuts'
+
+        pathtotemps =  '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/templates/ptbinned/Zjj_ptbin_temps_' + _cuts + 'cuts'+laba
+        pathtocoeffs = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_ptbinned/'+labp+'histo_nocuts'
         pathtoptbins = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_ptbinned/ptbins.txt'
-        pathtodata = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_ptbinned/histo_' +_cuts + 'cuts'
+        pathtodata = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_ptbinned/'+labp+'histo_' +_cuts + 'cuts'
         ptbins = loadptbins(pathtoptbins)
         nptbins = len(ptbins) - 1
 
 
+
     else:
-        pathtotemps = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/templates/inclusive/Zjj_inclusive_temps_' + _cuts + 'cuts1'
-        pathtocoeffs = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_inclusive/histo_nocuts'
-        pathtodata = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_inclusive/histo_' +_cuts + 'cuts'
+        pathtotemps = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/templates/inclusive/Zjj_inclusive_temps_' + _cuts + 'cuts'+laba
+        pathtocoeffs = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_inclusive/'+labp+'histo_nocuts'
+        pathtodata = '/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfitting/data_inclusive/'+labp+'histo_' +_cuts + 'cuts'
         nptbins = 1
     angbins = np.array(loadbins(pathtodata))
     if bin == 'of':
@@ -47,8 +54,10 @@ def main():
         coeff = loadcoeffs(pathtocoeffs, nptbins, overflow=False)[bin, :]
         data = loaddata(pathtodata, nptbins, _load='1D', overflow=False)
         sigma_unpol = data['xsec'][bin][0]
+        print(sigma_unpol)
         temps_cos = np.array(temps['cos'])[bin, :]
         temps_phi = np.array(temps['phi'])[bin, :]
+        print(coeff)
     elif is_iterable(bin):
         raise NotImplementedError
 
@@ -62,8 +71,16 @@ def main():
                 phi_errs.append(json.load(f)["yerrs"])
         cos_errs = np.array(cos_errs)
         phi_errs = np.array(phi_errs)
-        print(cos_errs.shape, phi_errs.shape)
-        print("_--------------------------------------_________")
+    else:
+        cos_errs = []
+        phi_errs = []
+        for i in range(9):
+            with open(pathtotemps + f'/ptbin{bin}_cos' + str(i) + '.json', 'r') as f:
+                cos_errs.append(np.array(json.load(f)["yerrs"]))
+            with open(pathtotemps + f'/ptbin{bin}_phi' + str(i) + '.json', 'r') as f:
+                phi_errs.append(json.load(f)["yerrs"])
+        cos_errs = np.array(cos_errs)
+        phi_errs = np.array(phi_errs)
 
     # filenames = []
     # for i in range(9):
@@ -153,8 +170,13 @@ def main():
         for axs in axs1:
             for ax in axs:
                 ax.legend()
-        print(f'save fig as: templates_inclusive_{"cuts" if cuts else "nocuts"}.png')
-        fig1.savefig(f'templates_inclusive_{"cuts" if cuts else "nocuts"}.png', dpi=300, transparent=True, bbox_inches='tight')
+        if ptbinned:
+            savename = f'templates_ptbin_{"cuts" if cuts else "nocuts"}{bin}.png'
+            print("number ptbins:", nptbins)
+        else:
+            savename = f'templates_inclusive_{"cuts" if cuts else "nocuts"}.png'
+        print("save fig as: ", savename)
+        fig1.savefig(savename, dpi=300, transparent=True, bbox_inches='tight')
         plt.show()
 
 if __name__ == "__main__":
