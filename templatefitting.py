@@ -69,6 +69,7 @@ class TemplateFits_2d():
             self.lumi = lumi
             self.errordef = Minuit.LIKELIHOOD
             self.coeffs = coeffs
+
         else:
             raise Exception("Not implemented yet")
 
@@ -80,12 +81,26 @@ class TemplateFits_2d():
             if lam[i] == 0:
                 null.append(i)
                 # print(i)
-            if lam[i] < 0:
-                print("lam[i]: ", lam[i])
+            # if lam[i] < 0:
+            #     print(f"lam[{i}]: ", lam[i])
         if null != []:
             pass
             # print("lam[i] = 0: ", null)
+        # try:
         l = -1 * np.sum((np.log(lam).T * self.data).T - lam)
+        # except RuntimeWarning as e:
+        #     print(e)
+        #     print("runtime warning")
+        #     lam_new = []
+        #     data_new = []
+        #     for j in range(len(lam)):
+        #         if not j in null:
+        #             lam_new.append(lam[j])
+        #             data_new.append(self.data[j])
+        #     lam_new = np.array(lam_new)
+        #     data_new = np.array(data_new)
+        #
+        #     l = -1 * np.sum((np.log(lam_new).T * data_new).T - lam_new)
         return l
 
 
