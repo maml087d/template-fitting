@@ -44,13 +44,25 @@ def loaddata(path='/home/maltem/Nextcloud/TU_Dresden/Bachelorthesis/minuitfittin
 
             with open(path+'/datbin'+str(j)+'_'+key+'.json', 'r') as f:
                 dat = json.load(f)
-                k = list(dat.keys())[-1]
+                for n in dat.keys():
+                    if n.find("vals") != -1:
+                        # print(n)
+                        k = n
+                        break
+                else: print("no key found", dat.keys()); raise Exception()
+                print(key, k)
                 data[key].append(np.array(dat[k]))
         if overflow:
 
             with open(path+'/overflow_'+key+'.json', 'r') as f:
                 dat = json.load(f)
-                k = list(dat.keys())[-1]
+                for n in dat.keys():
+                    if n.find("vals") != -1:
+                        print(n)
+                        k = n
+                        break
+                else: print("no key found", dat.keys()); raise Exception()
+                print(key, k)
                 data_of[key] = np.array(dat[k])
     if overflow:
         return data, data_of
@@ -109,13 +121,27 @@ def loadtemplates(path, numberbins=36, _load='2D', overflow=False):
                 print("LOADING: ", path+'/ptbin'+str(i)+'_'+key+str(j)+'.json')
                 with open(path+'/ptbin'+str(i)+'_'+key+str(j)+'.json', 'r') as f:
                     dat = json.load(f)
-                    data[key][i].append(np.array(dat[list(dat.keys())[1]]))
+                    for n in dat.keys():
+                        if n.find("vals") != -1:
+                            # print(n)
+                            k = n
+                            break
+                    else:
+                        print("no key found", dat.keys())
+                        raise Exception()
+                    print(key, k)
+                    data[key][i].append(np.array(dat[k]))
             if overflow:
                 print("LOADING: ", path+'/ptoverflow_' + key +str(j)+'.json')
 
                 with open(path+'/ptoverflow_' + key +str(j)+'.json', 'r') as f:
                     dat = json.load(f)
-                    k = list(dat.keys())[-1]
+                    for n in dat.keys():
+                        if n.find("vals") != -1:
+                            print(n)
+                            k = n
+                            break
+                    else: print("no key found", dat.keys()); raise Exception()
                     data_of[key][j] = np.array(dat[k])
     if overflow:
         return data, data_of
