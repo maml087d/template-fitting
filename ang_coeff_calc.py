@@ -90,18 +90,23 @@ def diffcross_phi(norm, phi, A):
 
 def main():
     # getting data from json
-    prefix="datbin0"
-    cuts='no' # '' or 'no'
+    # nptbins = 44
+    nptbins = 1
+    bin = 0
+    prefix="datbin" + str(bin)
+    prefix_path = 'data_inclusive/labframe/histo_'
+    # prefix_path = 'data_ptbinned/labframe/histo_'
+    cuts='' # '' or 'no'
     # with open('histodata/data.json', 'r') as f:
     #     data = json.load(f)
 
-    with open('data_inclusive/histo_' + cuts + 'cuts/' + prefix + '_cos.json', 'r') as f:
+    with open(prefix_path + cuts + 'cuts/' + prefix + '_cos.json', 'r') as f:
         hist_costheta = json.load(f)
 
-    with open('data_inclusive/histo_' + cuts + 'cuts/' + prefix + '_phi.json', 'r') as f:
+    with open(prefix_path + cuts + 'cuts/' + prefix + '_phi.json', 'r') as f:
         hist_phi = json.load(f)
 
-    with open('data_inclusive/histo_' + cuts + 'cuts/' + prefix + '_xsec.json', 'r') as f:
+    with open(prefix_path + cuts + 'cuts/' + prefix + '_xsec.json', 'r') as f:
         xsec_bin = json.load(f)
 
     for k in hist_costheta.keys():
@@ -131,7 +136,7 @@ def main():
     # with open("coeffs.txt", "w") as f:
     #     f.write(coeff_out)
 
-    coeff = loadcoeffs("data_inclusive/histo_nocuts", 1)[0][:-1]
+    coeff = loadcoeffs(f"{prefix_path}nocuts", nptbins)[bin][:-1]
     print(coeff)
 
     plot_cos = np.linspace(-1, 1, 1000)
@@ -213,7 +218,7 @@ def main():
 
         for ax in axs:
             ax.legend()
-        fig.savefig("/home/maltem/Documents/bachlorthesis/polynoms.png", dpi=300, transparent=True , bbox_inches='tight')
+        fig.savefig(f"/home/maltem/Documents/bachlorthesis/polynoms_{bin}.png", dpi=300, transparent=True , bbox_inches='tight')
         plt.show()
 
 
